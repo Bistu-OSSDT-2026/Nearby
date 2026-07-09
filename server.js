@@ -284,7 +284,7 @@ app.get('/api/messages/unread', (req, res) => {
   const { studentId } = req.query;
   if (!studentId) return res.json({ ok: false, count: 0 });
   const db = readDB();
-  const count = db.messages.filter(m => m.to_user === studentId).length;
+  const count = db.messages.filter(m => m.to_user === studentId && !m.is_read).length;
   res.json({ ok: true, count });
 });
 app.get('/api/conversations', (req, res) => {
@@ -306,7 +306,7 @@ app.get('/api/conversations', (req, res) => {
         itemTitle: item ? item.title : '已删除',
         lastMsg: m.content,
         lastTime: m.created_at,
-               unread: m.to_user === studentId && m.from_user === other && !m.is_read ? 1 : 0
+        unread: (convMap[key] ? convMap[key].unread : 0) + (m.to_user === studentId && m.from_user === other && !m.is_read ? 1 : 0)
       };
     } else if (m.to_user === studentId && m.from_user === other && !m.is_read) {
       convMap[key].unread = (convMap[key].unread || 0) + 1;
